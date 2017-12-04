@@ -1,6 +1,7 @@
 import numpy as np
 import yaml
 import cv2
+import logging
 
 class FaceDetector:
 
@@ -10,6 +11,8 @@ class FaceDetector:
         self.number_ = 0
         self.name_ = "default"
         self.training_ = False
+        self.size_ = 0
+        logging.basicConfig(level=logging.INFO)
 
     def setUp(self, doc):
         self.name_ = doc["name"]
@@ -26,18 +29,28 @@ class FaceDetector:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             #Extract the faces
             faces = self.face_cascade_.detectMultiScale(gray, 1.3, 5)
-            for (x,y,w,h) in faces:
-                cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-                #TODO: delete rectangle from the image before saved
-                if self.training_:
-                    crop_img = frame[y:y+h, x:x+w]
-                    self.number_ += 1
-                    self.saveImage(crop_img, self.number_)
-
+            for rect in faces:
+                (x,y,w,h) = rect
+                cv2.rectangle(frame,(x-self.size_, y-self.size_),(x+w+self.size_ ,y+h+self.size_),(255,0,0),2)
+                
+            key = cv2.waitKey(1)
+            # Press s to save and image of your detected face     
+            if key == ord('s'):
+                crop_img = frame[y-self.size_:y+h+self.size_, x-self.size_:x+w+self.size_]
+                self.number_ += 1
+                self.saveImage(crop_img, self.number_)
+                logging.info('Image saved succesfully')
+            elif key == ord('q'):
+                self.stop()
+            elif key == ord('b'):
+                self.size_ = self.size_ + 2
+                logging.info('Doing rectangle bigger')
+            elif key == ord('m'):
+                self.size_ = self.size_ - 2
+                logging.info('Doing rectangle smaller')
             # Display the resulting frame
             cv2.imshow('frame',frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.stop()
+            
 
     #Save image of your face only for training
     def saveImage(self, img, number):
@@ -48,6 +61,7 @@ class FaceDetector:
         # When everything done, release the capture
         cap_.release()
         cv2.destroyAllWindows()
+        
 
 
 if __name__ == "__main__":
