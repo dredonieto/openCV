@@ -45,6 +45,15 @@ def prepare_training_data(folder_path):
                 labels.append(label)
     return faces, labels
 
+
+print("Let's prepare the training data")
+faces, labels = prepare_training_data("training_data")
+print("Faces detected: ", len(faces))
+
+# We are going to use LBPH recognizer
+face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+face_recognizer.train(faces, np.array(labels))
+
 # Function to draw rectangle on image
 def draw_rectangle(img, rect):
     (x, y, w, h) = rect
@@ -59,23 +68,16 @@ def predict(test_img):
     # Make a copy to avoid changing the original
     img = test_img.copy()
     face, rect = detect_face(img)
-    label = face_recognizer.predict(face)
+    label, confidence = face_recognizer.predict(face)
     label_text = subjects[label]
     draw_rectangle(img, rect)
     draw_text(img, label_text, rect[0], rect[1]-5)
     return img
 
-print("Let's prepare the training data")
-faces, labels = prepare_training_data("training_data")
-print("Faces detected: ", len(faces))
-
-# We are going to use LBPH recognizer
-face_recognizer = cv2.face.createLBPHFaceRecognizer()
-face_recognizer.train(faces, np.array(labels))
 
 print("Now, let's predict some faces...")
 # Load test image
-test1 = cv2.imread("test_data/img1.jpg")
+test1 = cv2.imread("test_data/David1.jpg")
 # Make the prediction
 predict1 = predict(test1)
 cv2.imshow(subjects[1], predict1)
