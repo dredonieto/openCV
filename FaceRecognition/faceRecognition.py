@@ -1,9 +1,7 @@
-#OpenCV module
 import cv2
-#os module for reading training data directories and paths
 import os
-#numpy to convert python lists to numpy arrays as it is needed by OpenCV face recognizers
 import numpy as np
+
 
 subjects = ["" , "David", "Mama"]
 
@@ -14,7 +12,7 @@ def detect_face(img):
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
     if (len(faces) == 0):
         return None, None
-    # Only one face
+    # Only one face because our training set has only one face
     (x, y, w, h) = faces[0]
     return gray[y:y+w, x:x+h], faces[0]
 
@@ -53,33 +51,6 @@ print("Faces detected: ", len(faces))
 # We are going to use LBPH recognizer
 face_recognizer = cv2.face.LBPHFaceRecognizer_create()
 face_recognizer.train(faces, np.array(labels))
-
-# Function to draw rectangle on image
-def draw_rectangle(img, rect):
-    (x, y, w, h) = rect
-    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-# Function to draw text
-def draw_text(img, text, x, y):
-    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
-
-# Function to predict
-def predict(test_img):
-    # Make a copy to avoid changing the original
-    img = test_img.copy()
-    face, rect = detect_face(img)
-    label, confidence = face_recognizer.predict(face)
-    label_text = subjects[label]
-    draw_rectangle(img, rect)
-    draw_text(img, label_text, rect[0], rect[1]-5)
-    return img
-
-
-print("Now, let's predict some faces...")
-# Load test image
-test1 = cv2.imread("test_data/David1.jpg")
-# Make the prediction
-predict1 = predict(test1)
-cv2.imshow(subjects[1], predict1)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#save_object(face_recognizer, "face_recognizer")
+face_recognizer.save('classifier.xml')
+print('classifier saved succesfully')
