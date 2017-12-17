@@ -1,9 +1,10 @@
 import cv2
 import os
 import numpy as np
+import sys
 
 
-subjects = ["" , "David", "Mama"]
+subjects = ["" , "David", "Mama", "Elena"]
 
 # Function to detect face using OpenCV
 def detect_face(img):
@@ -44,13 +45,18 @@ def prepare_training_data(folder_path):
     return faces, labels
 
 
-print("Let's prepare the training data")
-faces, labels = prepare_training_data("training_data")
-print("Faces detected: ", len(faces))
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("USAGE: faceRecognition.py 'ClassiferName' ")
+        sys.exit()
+        
+    print("Let's prepare the training data")
+    faces, labels = prepare_training_data("training_data")
+    print("Faces detected: ", len(faces))
 
-# We are going to use LBPH recognizer
-face_recognizer = cv2.face.LBPHFaceRecognizer_create()
-face_recognizer.train(faces, np.array(labels))
-#save_object(face_recognizer, "face_recognizer")
-face_recognizer.save('classifier.xml')
-print('classifier saved succesfully')
+    # We are going to use LBPH recognizer
+    face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+    face_recognizer.train(faces, np.array(labels))
+    name = sys.argv[1] + ".xml"
+    face_recognizer.save(name)
+    print('classifier saved succesfully')
