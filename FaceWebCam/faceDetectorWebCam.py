@@ -1,22 +1,18 @@
 import numpy as np
-import yaml
 import cv2
 import logging
+import sys
 
 class FaceDetector:
 
-    def __init__(self):
+    def __init__(self, name="image"):
         self.cap_ = cv2.VideoCapture(1)
         self.face_cascade_ = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         self.number_ = 0
-        self.name_ = "default"
+        self.name_ = name
         self.training_ = False
         self.size_ = 0
         logging.basicConfig(level=logging.INFO)
-
-    def setUp(self, doc):
-        self.name_ = doc["name"]
-        self.training_ = doc["training"]
 
     def start(self):
         if not self.cap_.isOpened():
@@ -59,14 +55,16 @@ class FaceDetector:
 
     def stop(self):
         # When everything done, release the capture
-        cap_.release()
+        self.cap_.release()
         cv2.destroyAllWindows()
         
 
 
 if __name__ == "__main__":
-    with open('parameters.yaml','r') as f:
-        doc = yaml.load(f)
-    detector = FaceDetector()
-    detector.setUp(doc)
-    detector.start()
+    if len(sys.argv) != 2:
+        detector = FaceDetector()
+        detector.start()
+    else:
+        detector = FaceDetector(sys.argv[1])
+        detector.start()
+    
